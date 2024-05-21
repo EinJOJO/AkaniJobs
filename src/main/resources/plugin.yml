@@ -1,0 +1,8 @@
+name: Jobs
+main: it.einjojo.jobs.JobPlugin
+version: ${version}
+author: EinJoJo
+description: Jobs plugin
+api-version: 1.19
+website: https://einjojo.it
+database: true
