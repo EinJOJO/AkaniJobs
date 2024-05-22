@@ -1,4 +1,5 @@
 import it.einjojo.jobs.Job;
+import it.einjojo.jobs.db.HikariCP;
 import it.einjojo.jobs.db.SQLJobStorage;
 import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.JobProgression;

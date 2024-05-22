@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    alias(libs.plugins.runpaper)
 
 }
 
@@ -22,6 +23,7 @@ dependencies {
     compileOnly(libs.akanicore)
     compileOnly(libs.hikaricp)
     compileOnly(libs.caffeine)
+    compileOnly(libs.mariadb)
     implementation(libs.acf)
     implementation(libs.invui)
 
@@ -46,16 +48,20 @@ tasks {
         useJUnitPlatform()
     }
 
+    runServer {
+        minecraftVersion("1.20.4")
+
+    }
+
     processResources {
-
-
         filesMatching("**/plugin.yml") {
             expand(
                 mapOf(
                     "version" to project.version,
                     "group" to project.group,
                     "caffeine" to libs.caffeine.get(),
-                    "hikari" to libs.hikaricp.get()
+                    "hikari" to libs.hikaricp.get(),
+                    "maria" to libs.mariadb.get()
                 )
             )
         }

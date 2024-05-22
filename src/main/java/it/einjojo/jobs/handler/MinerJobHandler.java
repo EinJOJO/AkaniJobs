@@ -23,7 +23,6 @@ public class MinerJobHandler extends AbstractJobHandler implements Listener {
         if (!isTracked(playerUuid)) return;
         playerJobProgression(playerUuid).thenAccept((progression) -> {
             progression.addXp(1);
-
         });
     }
 

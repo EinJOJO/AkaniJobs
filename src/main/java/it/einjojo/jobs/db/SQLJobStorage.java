@@ -7,6 +7,8 @@ import it.einjojo.jobs.player.JobPlayer;
 import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.JobProgression;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,7 +16,9 @@ import java.sql.Statement;
 import java.util.UUID;
 
 public class SQLJobStorage implements JobStorage {
+    private static final Logger logger = LoggerFactory.getLogger(SQLJobStorage.class);
     private final HikariDataSource dataSource;
+
 
     public SQLJobStorage(HikariDataSource dataSource) {
         this.dataSource = dataSource;
@@ -26,6 +30,7 @@ public class SQLJobStorage implements JobStorage {
             statement.execute("CREATE TABLE IF NOT EXISTS jobs_progressions " + "(player_uuid VARCHAR(36) NOT NULL, " + "job_name VARCHAR(16) NOT NULL, " + "level INT NOT NULL, " + "experience INT NOT NULL, " + "PRIMARY KEY (player_uuid, job_name));");
             statement.execute("CREATE TABLE IF NOT EXISTS jobs_players " + "(player_uuid VARCHAR(36) NOT NULL, " + "job_name VARCHAR(16) NULL, " + "PRIMARY KEY (player_uuid));");
             statement.execute("CREATE TABLE IF NOT EXISTS jobs_locks " + "(player_uuid VARCHAR(36) NOT NULL, " + "PRIMARY KEY (player_uuid));");
+            logger.info("SQLJobStorage initialized");
             return true;
         } catch (Exception e) {
             throw new StorageException("init", e);

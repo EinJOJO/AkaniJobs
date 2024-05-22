@@ -8,4 +8,4 @@ website: https://einjojo.it
 database: true
 softdepend:
   - AkaniCore
-libraries: [ "${caffeine}", "${hikari}" ]
+libraries: [ "${caffeine}", "${hikari}", "${maria}" ]

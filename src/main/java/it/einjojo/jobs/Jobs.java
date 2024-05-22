@@ -24,10 +24,10 @@ public class Jobs {
     private final JobChangeObserver currentJobObserver;
     private final JobHandlerRegistry handlerRegistry = new JobHandlerRegistry(this);
     private final AsyncLoadingCache<UUID, JobPlayer> jobPlayers = Caffeine.newBuilder()
-            .expireAfterAccess(Duration.ofMinutes(10))
+            .expireAfterAccess(Duration.ofMinutes(3))
             .buildAsync(this::loadPlayer);
     private final AsyncLoadingCache<UUID, Optional<JobProgression>> activeProgressions = Caffeine.newBuilder()
-            .expireAfterAccess(Duration.ofMinutes(10))
+            .expireAfterAccess(Duration.ofMinutes(3))
             .buildAsync(this::loadProgression);
 
     public Jobs(JobStorage storage, DataSaveTask saveTask) {
@@ -36,7 +36,7 @@ public class Jobs {
         this.currentJobObserver = new JobChangeObserverImpl(this, saveTask);
     }
 
-    private CompletableFuture<JobPlayerImpl> loadPlayer(UUID uuid, Executor executor) {
+    public CompletableFuture<JobPlayerImpl> loadPlayer(UUID uuid, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             var jobPlayer = storage.loadJobPlayer(uuid);
             jobPlayer.setJobs(this);
@@ -45,7 +45,7 @@ public class Jobs {
         }, executor);
     }
 
-    private CompletableFuture<Optional<JobProgression>> loadProgression(UUID key, Executor executor) {
+    public CompletableFuture<Optional<JobProgression>> loadProgression(UUID key, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             var jobPlayer = jobPlayers.synchronous().get(key);
             Job currentJob = jobPlayer.currentJob();
