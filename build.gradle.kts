@@ -8,6 +8,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.aikar.co/content/groups/aikar/")
     maven("https://repo.akani.dev/releases")
     maven("https://repo.oraxen.com/releases")
@@ -20,6 +21,7 @@ dependencies {
     compileOnly(libs.paper)
     compileOnly(libs.akanicore)
     compileOnly(libs.hikaricp)
+    compileOnly(libs.caffeine)
     implementation(libs.acf)
     implementation(libs.invui)
 
@@ -30,8 +32,7 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 
 }
 
@@ -46,6 +47,17 @@ tasks {
 
     processResources {
 
+
+        filesMatching("**/plugin.yml") {
+            expand(
+                mapOf(
+                    "version" to project.version,
+                    "group" to project.group,
+                    "caffeine" to libs.caffeine.get(),
+                    "hikari" to libs.hikaricp.get()
+                )
+            )
+        }
     }
 
 }

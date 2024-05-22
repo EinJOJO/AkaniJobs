@@ -1,20 +1,21 @@
 package it.einjojo.jobs.db;
 
+import com.google.common.base.Preconditions;
 import com.zaxxer.hikari.HikariDataSource;
-import it.einjojo.jobs.player.JobPlayer;
+import it.einjojo.jobs.player.PlayerJob;
+import it.einjojo.jobs.player.PlayerJobImpl;
 import it.einjojo.jobs.player.progression.PlayerJobProgression;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.UUID;
 
-public class MysqlJobStorage implements JobStorage {
+public class SQLJobStorage implements JobStorage {
     private final HikariDataSource dataSource;
 
-    public MysqlJobStorage(HikariDataSource dataSource) {
+    public SQLJobStorage(HikariDataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -40,24 +41,26 @@ public class MysqlJobStorage implements JobStorage {
     }
 
     @Override
-    public void saveJobPlayer(JobPlayer jobPlayer) {
+    public void saveJobPlayer(@NotNull PlayerJob playerJob) {
+        Preconditions.checkNotNull(playerJob, "playerJob cannot be null");
         String sql = "INSERT INTO jobs_players (player_uuid, job_name) " +
                 "VALUES (?, ?) " +
                 "ON DUPLICATE KEY UPDATE job_name = ?;";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, jobPlayer.playerUUID().toString());
-            ps.setString(2, jobPlayer.currentJobName());
-            ps.setString(3, jobPlayer.currentJobName());
+            ps.setString(1, playerJob.playerUuid().toString());
+            ps.setString(2, playerJob.currentJob());
+            ps.setString(3, playerJob.currentJob());
             ps.executeUpdate();
         } catch (Exception e) {
-            throw new StorageException("save %s".formatted(jobPlayer), e);
+            throw new StorageException("save %s".formatted(playerJob), e);
         }
     }
 
     @Override
     public void saveJobProgression(@NotNull PlayerJobProgression progression) {
+        Preconditions.checkNotNull(progression, "progression cannot be null");
         String sql = "INSERT INTO jobs_progressions (player_uuid, job_name, level, experience) " +
                 "VALUES (?, ?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE level = ?, experience = ?;";
@@ -78,7 +81,7 @@ public class MysqlJobStorage implements JobStorage {
 
 
     @Override
-    public @Nullable PlayerJobProgression loadJobProgression(UUID player, String jobName) {
+    public @NotNull PlayerJobProgression loadJobProgression(@NotNull UUID player, @NotNull String jobName) {
         String sql = "SELECT level, experience FROM jobs_progressions WHERE player_uuid = ? AND job_name = ?;";
 
         try (Connection connection = dataSource.getConnection();
@@ -93,22 +96,22 @@ public class MysqlJobStorage implements JobStorage {
         } catch (Exception e) {
             throw new StorageException("load JobProgression (%s, %s)".formatted(player, jobName), e);
         }
-        return null;
+        return new PlayerJobProgression(player, jobName, 0, 0);
     }
 
     @Override
-    public JobPlayer loadJobPlayer(UUID player) {
+    public @NotNull PlayerJobImpl loadJobPlayer(@NotNull UUID player) {
         String sql = "SELECT job_name FROM jobs_players WHERE player_uuid = ?;";
         try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, player.toString());
             try (var rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new JobPlayer(player, rs.getString("job_name"));
+                    return new PlayerJobImpl(player, rs.getString("job_name"));
                 }
             }
         } catch (Exception e) {
             throw new StorageException("load JobPlayer (%s)".formatted(player), e);
         }
-        return new JobPlayer(player, null);
+        return new PlayerJobImpl(player, null);
     }
 }

@@ -22,6 +22,14 @@ public class PlayerJobProgression {
         return player;
     }
 
+    public JobProgressionObserver observer() {
+        return observer;
+    }
+
+    public void setObserver(JobProgressionObserver observer) {
+        this.observer = observer;
+    }
+
     public int level() {
         return level;
     }

@@ -1,9 +1,9 @@
 package it.einjojo.jobs.db;
 
-import it.einjojo.jobs.player.JobPlayer;
+import it.einjojo.jobs.player.PlayerJob;
+import it.einjojo.jobs.player.PlayerJobImpl;
 import it.einjojo.jobs.player.progression.PlayerJobProgression;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -13,12 +13,14 @@ public interface JobStorage {
 
     void saveJobProgression(@NotNull PlayerJobProgression progression);
 
-    void saveJobPlayer(JobPlayer jobPlayer);
 
-    JobPlayer loadJobPlayer(UUID player);
+    void saveJobPlayer(@NotNull PlayerJob playerJob);
 
-    @Nullable
-    PlayerJobProgression loadJobProgression(UUID player, String jobName);
+    @NotNull
+    PlayerJobImpl loadJobPlayer(@NotNull UUID player);
+
+    @NotNull
+    PlayerJobProgression loadJobProgression(@NotNull UUID player, @NotNull String jobName);
 
 
 }

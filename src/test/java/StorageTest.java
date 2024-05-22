@@ -1,5 +1,5 @@
-import it.einjojo.jobs.db.MysqlJobStorage;
-import it.einjojo.jobs.player.JobPlayer;
+import it.einjojo.jobs.db.SQLJobStorage;
+import it.einjojo.jobs.player.PlayerJobImpl;
 import it.einjojo.jobs.player.progression.PlayerJobProgression;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,12 +13,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class StorageTest {
     private HikariCP hikariCP;
-    private MysqlJobStorage storage;
+    private SQLJobStorage storage;
 
     @BeforeAll
     void setUp() {
         hikariCP = new HikariCP();
-        storage = new MysqlJobStorage(hikariCP.dataSource());
+        storage = new SQLJobStorage(hikariCP.dataSource());
         storage.init();
     }
 
@@ -29,7 +29,7 @@ public class StorageTest {
 
     @Test
     void writeReadJobPlayer() {
-        var jobPlayer = new JobPlayer(UUID.randomUUID(), "job1");
+        var jobPlayer = new PlayerJobImpl(UUID.randomUUID(), "job1");
         storage.saveJobPlayer(jobPlayer);
         var loaded = storage.loadJobPlayer(jobPlayer.playerUUID());
         assertNotNull(loaded);
