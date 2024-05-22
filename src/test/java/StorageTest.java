@@ -1,7 +1,7 @@
 import it.einjojo.jobs.Job;
 import it.einjojo.jobs.db.SQLJobStorage;
 import it.einjojo.jobs.player.JobPlayerImpl;
-import it.einjojo.jobs.player.progression.PlayerJobProgression;
+import it.einjojo.jobs.player.progression.JobProgression;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ public class StorageTest {
         var loaded = storage.loadJobPlayer(jobPlayer.playerUuid());
         assertNotNull(loaded);
         assertEquals(jobPlayer, loaded);
-        loaded.setCurrentJobName("job2");
+        loaded.setCurrentJob(Job.FARMER);
         storage.saveJobPlayer(loaded);
         var reloaded = storage.loadJobPlayer(loaded.playerUuid());
         assertNotNull(reloaded);
@@ -44,7 +44,7 @@ public class StorageTest {
 
     @Test
     void writeReadJobProgression() {
-        var progression = new PlayerJobProgression(UUID.randomUUID(), Job.MINER, 0, 0);
+        var progression = new JobProgression(UUID.randomUUID(), Job.MINER, 0, 0);
         storage.saveJobProgression(progression);
         var loaded = storage.loadJobProgression(progression.playerUuid(), progression.job());
         assertNotNull(loaded);
@@ -55,7 +55,16 @@ public class StorageTest {
         var reloaded = storage.loadJobProgression(progression.playerUuid(), progression.job());
         assertNotNull(reloaded);
         assertEquals(progression, reloaded);
+    }
 
+    @Test
+    void testLocks() {
+        var player = UUID.randomUUID();
+        assertFalse(storage.isPlayerLocked(player));
+        storage.lockPlayer(player);
+        assertTrue(storage.isPlayerLocked(player));
+        storage.unlockPlayer(player);
+        assertFalse(storage.isPlayerLocked(player));
     }
 
 

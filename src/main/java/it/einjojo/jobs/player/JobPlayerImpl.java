@@ -2,7 +2,7 @@ package it.einjojo.jobs.player;
 
 import it.einjojo.jobs.Job;
 import it.einjojo.jobs.Jobs;
-import it.einjojo.jobs.player.progression.PlayerJobProgression;
+import it.einjojo.jobs.player.progression.JobProgression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -66,7 +66,7 @@ public class JobPlayerImpl implements JobPlayer {
         this.jobs = jobs;
     }
 
-    public Optional<PlayerJobProgression> progression() {
+    public Optional<JobProgression> progression() {
         if (jobs == null) {
             throw new IllegalStateException("Jobs instance not set");
         }
@@ -81,7 +81,7 @@ public class JobPlayerImpl implements JobPlayer {
         this.currentJobObserver = currentJobObserver;
     }
 
-    public CompletableFuture<Optional<PlayerJobProgression>> progressionAsync() {
+    public CompletableFuture<Optional<JobProgression>> progressionAsync() {
         if (jobs == null) {
             throw new IllegalStateException("Jobs instance not set");
         }

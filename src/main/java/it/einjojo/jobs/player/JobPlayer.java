@@ -1,7 +1,7 @@
 package it.einjojo.jobs.player;
 
 import it.einjojo.jobs.Job;
-import it.einjojo.jobs.player.progression.PlayerJobProgression;
+import it.einjojo.jobs.player.progression.JobProgression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -27,8 +27,8 @@ public interface JobPlayer {
 
     void setCurrentJob(Job newJob);
 
-    Optional<PlayerJobProgression> progression();
+    Optional<JobProgression> progression();
 
-    CompletableFuture<Optional<PlayerJobProgression>> progressionAsync();
+    CompletableFuture<Optional<JobProgression>> progressionAsync();
 
 }

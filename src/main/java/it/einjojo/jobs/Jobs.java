@@ -8,10 +8,11 @@ import it.einjojo.jobs.player.JobChangeObserver;
 import it.einjojo.jobs.player.JobChangeObserverImpl;
 import it.einjojo.jobs.player.JobPlayer;
 import it.einjojo.jobs.player.JobPlayerImpl;
+import it.einjojo.jobs.player.progression.JobProgression;
 import it.einjojo.jobs.player.progression.JobProgressionObserver;
 import it.einjojo.jobs.player.progression.JobProgressionObserverImpl;
-import it.einjojo.jobs.player.progression.PlayerJobProgression;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -19,14 +20,20 @@ import java.util.concurrent.Executor;
 
 public class Jobs {
     private final JobStorage storage;
-    private final JobProgressionObserver progressionObserver = new JobProgressionObserverImpl();
-    private final JobChangeObserver currentJobObserver = new JobChangeObserverImpl(this);
+    private final JobProgressionObserver progressionObserver;
+    private final JobChangeObserver currentJobObserver;
     private final JobHandlerRegistry handlerRegistry = new JobHandlerRegistry(this);
-    private final AsyncLoadingCache<UUID, JobPlayer> jobPlayers = Caffeine.newBuilder().buildAsync(this::loadPlayer);
-    private final AsyncLoadingCache<UUID, Optional<PlayerJobProgression>> activeProgressions = Caffeine.newBuilder().buildAsync(this::loadProgression);
+    private final AsyncLoadingCache<UUID, JobPlayer> jobPlayers = Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(10))
+            .buildAsync(this::loadPlayer);
+    private final AsyncLoadingCache<UUID, Optional<JobProgression>> activeProgressions = Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(10))
+            .buildAsync(this::loadProgression);
 
-    public Jobs(JobStorage storage) {
+    public Jobs(JobStorage storage, DataSaveTask saveTask) {
         this.storage = storage;
+        this.progressionObserver = new JobProgressionObserverImpl(saveTask);
+        this.currentJobObserver = new JobChangeObserverImpl(this, saveTask);
     }
 
     private CompletableFuture<JobPlayerImpl> loadPlayer(UUID uuid, Executor executor) {
@@ -38,7 +45,7 @@ public class Jobs {
         }, executor);
     }
 
-    private CompletableFuture<Optional<PlayerJobProgression>> loadProgression(UUID key, Executor executor) {
+    private CompletableFuture<Optional<JobProgression>> loadProgression(UUID key, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             var jobPlayer = jobPlayers.synchronous().get(key);
             Job currentJob = jobPlayer.currentJob();
@@ -73,7 +80,7 @@ public class Jobs {
         return handlerRegistry;
     }
 
-    public AsyncLoadingCache<UUID, Optional<PlayerJobProgression>> activeProgressions() {
+    public AsyncLoadingCache<UUID, Optional<JobProgression>> activeProgressions() {
         return activeProgressions;
     }
 }

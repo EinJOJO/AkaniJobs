@@ -25,7 +25,8 @@ public class JobsPlugin extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        jobs = new Jobs(storage);
+        DataSaveTask saveTask = new DataSaveTask(this, storage);
+        jobs = new Jobs(storage, saveTask);
         jobs.handlerRegistry().register(new MinerJobHandler(this));
     }
 

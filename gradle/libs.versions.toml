@@ -11,6 +11,8 @@ gson = "2.10.1"
 jedis = "5.1.0"
 hikaricp = "5.1.0"
 invui = "1.30"
+guava = "33.1.0-jre"
+
 
 [libraries]
 acf = { group = "co.aikar", name = "acf-paper", version.ref = "acf" }
@@ -21,6 +23,8 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 jedis = { group = "redis.clients", name = "jedis", version.ref = "jedis" }
 luckperms = { group = "net.luckperms", name = "api", version.ref = "luckperms" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+
 akanicore = { group = "it.einjojo.akani.core", name = "paper", version.ref = "akanicore" }
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 invui = { group = "xyz.xenondevs.invui", name = "invui", version.ref = "invui" }

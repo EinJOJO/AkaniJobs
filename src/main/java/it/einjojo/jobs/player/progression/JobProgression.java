@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PlayerJobProgression {
+public class JobProgression {
     private final UUID playerUuid;
     private final Job job;
     private int level;
@@ -17,7 +17,7 @@ public class PlayerJobProgression {
 
     private transient @Nullable JobProgressionObserver observer;
 
-    public PlayerJobProgression(UUID playerUuid, Job job, int level, int xp) {
+    public JobProgression(UUID playerUuid, Job job, int level, int xp) {
         this.playerUuid = playerUuid;
         this.job = job;
         this.level = level;
@@ -85,7 +85,7 @@ public class PlayerJobProgression {
     @Override
     public final boolean equals(Object object) {
         if (this == object) return true;
-        if (!(object instanceof PlayerJobProgression that)) return false;
+        if (!(object instanceof JobProgression that)) return false;
 
         return level == that.level && xp == that.xp && playerUuid.equals(that.playerUuid) && job == that.job;
     }

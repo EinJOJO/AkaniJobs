@@ -2,7 +2,7 @@ package it.einjojo.jobs.handler;
 
 import it.einjojo.jobs.Job;
 import it.einjojo.jobs.Jobs;
-import it.einjojo.jobs.player.progression.PlayerJobProgression;
+import it.einjojo.jobs.player.progression.JobProgression;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +55,7 @@ public abstract class AbstractJobHandler {
      * @return The player's job progression object
      * @throws IllegalStateException If the player is not tracking the correct job progression object
      */
-    protected CompletableFuture<PlayerJobProgression> playerJobProgression(UUID uuid) {
+    protected CompletableFuture<JobProgression> playerJobProgression(UUID uuid) {
         return jobs.activeProgressions().get(uuid)
                 .thenApply((opt) -> opt.orElseThrow(() -> new IllegalStateException("Expected the tracking player to have a progression object")))
                 .thenApply((progression) -> {

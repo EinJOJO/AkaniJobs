@@ -25,6 +25,7 @@ dependencies {
     implementation(libs.acf)
     implementation(libs.invui)
 
+    testImplementation(libs.guava)
     testImplementation(libs.hikaricp)
     testImplementation(libs.mariadb)
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
