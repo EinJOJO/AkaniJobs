@@ -2,8 +2,9 @@ package it.einjojo.jobs.db;
 
 import com.google.common.base.Preconditions;
 import com.zaxxer.hikari.HikariDataSource;
-import it.einjojo.jobs.player.PlayerJob;
-import it.einjojo.jobs.player.PlayerJobImpl;
+import it.einjojo.jobs.Job;
+import it.einjojo.jobs.player.JobPlayer;
+import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.PlayerJobProgression;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,20 +42,20 @@ public class SQLJobStorage implements JobStorage {
     }
 
     @Override
-    public void saveJobPlayer(@NotNull PlayerJob playerJob) {
-        Preconditions.checkNotNull(playerJob, "playerJob cannot be null");
+    public void saveJobPlayer(@NotNull JobPlayer jobPlayer) {
+        Preconditions.checkNotNull(jobPlayer, "playerJob cannot be null");
         String sql = "INSERT INTO jobs_players (player_uuid, job_name) " +
                 "VALUES (?, ?) " +
                 "ON DUPLICATE KEY UPDATE job_name = ?;";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, playerJob.playerUuid().toString());
-            ps.setString(2, playerJob.currentJob());
-            ps.setString(3, playerJob.currentJob());
+            ps.setString(1, jobPlayer.playerUuid().toString());
+            ps.setString(2, jobPlayer.currentJobName());
+            ps.setString(3, jobPlayer.currentJobName());
             ps.executeUpdate();
         } catch (Exception e) {
-            throw new StorageException("save %s".formatted(playerJob), e);
+            throw new StorageException("save %s".formatted(jobPlayer), e);
         }
     }
 
@@ -67,7 +68,7 @@ public class SQLJobStorage implements JobStorage {
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, progression.player().toString());
+            ps.setString(1, progression.playerUuid().toString());
             ps.setString(2, progression.jobName());
             ps.setInt(3, progression.level());
             ps.setInt(4, progression.xp());
@@ -81,37 +82,37 @@ public class SQLJobStorage implements JobStorage {
 
 
     @Override
-    public @NotNull PlayerJobProgression loadJobProgression(@NotNull UUID player, @NotNull String jobName) {
+    public @NotNull PlayerJobProgression loadJobProgression(@NotNull UUID player, @NotNull Job job) {
         String sql = "SELECT level, experience FROM jobs_progressions WHERE player_uuid = ? AND job_name = ?;";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, player.toString());
-            ps.setString(2, jobName);
+            ps.setString(2, job.name());
 
             var rs = ps.executeQuery();
             if (rs.next()) {
-                return new PlayerJobProgression(player, jobName, rs.getInt("level"), rs.getInt("experience"));
+                return new PlayerJobProgression(player, job, rs.getInt("level"), rs.getInt("experience"));
             }
         } catch (Exception e) {
-            throw new StorageException("load JobProgression (%s, %s)".formatted(player, jobName), e);
+            throw new StorageException("load JobProgression (%s, %s)".formatted(player, job.name()), e);
         }
-        return new PlayerJobProgression(player, jobName, 0, 0);
+        return new PlayerJobProgression(player, job, 0, 0);
     }
 
     @Override
-    public @NotNull PlayerJobImpl loadJobPlayer(@NotNull UUID player) {
+    public @NotNull JobPlayerImpl loadJobPlayer(@NotNull UUID player) {
         String sql = "SELECT job_name FROM jobs_players WHERE player_uuid = ?;";
         try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, player.toString());
             try (var rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new PlayerJobImpl(player, rs.getString("job_name"));
+                    return new JobPlayerImpl(player, Job.valueOf(rs.getString("job_name")));
                 }
             }
         } catch (Exception e) {
             throw new StorageException("load JobPlayer (%s)".formatted(player), e);
         }
-        return new PlayerJobImpl(player, null);
+        return new JobPlayerImpl(player, null);
     }
 }

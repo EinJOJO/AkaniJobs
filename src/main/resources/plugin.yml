@@ -1,5 +1,5 @@
 name: Jobs
-main: it.einjojo.jobs.JobPlugin
+main: it.einjojo.jobs.JobsPlugin
 version: ${version}
 author: EinJoJo
 description: Jobs plugin

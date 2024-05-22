@@ -1,32 +1,40 @@
 package it.einjojo.jobs.player.progression;
 
+import it.einjojo.jobs.Job;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerJobProgression {
-    private final UUID player;
-    private final String jobName;
+    private final UUID playerUuid;
+    private final Job job;
     private int level;
     private int xp;
 
-    private transient JobProgressionObserver observer;
+    private transient @Nullable JobProgressionObserver observer;
 
-    public PlayerJobProgression(UUID player, String jobName, int level, int xp) {
-        this.player = player;
-        this.jobName = jobName;
+    public PlayerJobProgression(UUID playerUuid, Job job, int level, int xp) {
+        this.playerUuid = playerUuid;
+        this.job = job;
         this.level = level;
         this.xp = xp;
     }
 
-    public UUID player() {
-        return player;
+
+    public Optional<Player> player() {
+        return Optional.ofNullable(Bukkit.getPlayer(playerUuid));
     }
 
-    public JobProgressionObserver observer() {
-        return observer;
+    public UUID playerUuid() {
+        return playerUuid;
     }
 
-    public void setObserver(JobProgressionObserver observer) {
+
+    public void setObserver(@Nullable JobProgressionObserver observer) {
         this.observer = observer;
     }
 
@@ -49,11 +57,19 @@ public class PlayerJobProgression {
     }
 
     public String jobName() {
-        return jobName;
+        return job.name();
+    }
+
+    public Job job() {
+        return job;
     }
 
     public int xp() {
         return xp;
+    }
+
+    public void addXp(int xp) {
+        setXp(this.xp + xp);
     }
 
     public void setXp(int xp) {
@@ -71,26 +87,24 @@ public class PlayerJobProgression {
         if (this == object) return true;
         if (!(object instanceof PlayerJobProgression that)) return false;
 
-        return level == that.level && xp == that.xp && player.equals(that.player) && jobName.equals(that.jobName) && Objects.equals(observer, that.observer);
+        return level == that.level && xp == that.xp && playerUuid.equals(that.playerUuid) && job == that.job;
     }
 
     @Override
     public int hashCode() {
-        int result = player.hashCode();
-        result = 31 * result + jobName.hashCode();
+        int result = playerUuid.hashCode();
+        result = 31 * result + Objects.hashCode(job);
         result = 31 * result + level;
         result = 31 * result + xp;
-        result = 31 * result + Objects.hashCode(observer);
         return result;
     }
 
     @Override
     public String toString() {
-        return "PlayerJobProgression{" +
-                "player=" + player +
-                ", jobName='" + jobName + '\'' +
-                ", xp=" + xp +
+        return "PlayerJobProgression{" + "xp=" + xp +
                 ", level=" + level +
+                ", job=" + job +
+                ", playerUuid=" + playerUuid +
                 '}';
     }
 }

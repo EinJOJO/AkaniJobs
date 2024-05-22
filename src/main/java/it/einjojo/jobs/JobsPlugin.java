@@ -4,11 +4,12 @@ package it.einjojo.jobs;
 import it.einjojo.akani.core.api.AkaniCore;
 import it.einjojo.jobs.db.JobStorage;
 import it.einjojo.jobs.db.SQLJobStorage;
+import it.einjojo.jobs.handler.MinerJobHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class JobPlugin extends JavaPlugin {
+public class JobsPlugin extends JavaPlugin {
 
     private Jobs jobs;
 
@@ -25,6 +26,7 @@ public class JobPlugin extends JavaPlugin {
             return;
         }
         jobs = new Jobs(storage);
+        jobs.handlerRegistry().register(new MinerJobHandler(this));
     }
 
     public Jobs jobs() {

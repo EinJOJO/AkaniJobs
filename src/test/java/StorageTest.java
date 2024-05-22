@@ -1,5 +1,6 @@
+import it.einjojo.jobs.Job;
 import it.einjojo.jobs.db.SQLJobStorage;
-import it.einjojo.jobs.player.PlayerJobImpl;
+import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.PlayerJobProgression;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,29 +30,29 @@ public class StorageTest {
 
     @Test
     void writeReadJobPlayer() {
-        var jobPlayer = new PlayerJobImpl(UUID.randomUUID(), "job1");
+        var jobPlayer = new JobPlayerImpl(UUID.randomUUID(), Job.MINER);
         storage.saveJobPlayer(jobPlayer);
-        var loaded = storage.loadJobPlayer(jobPlayer.playerUUID());
+        var loaded = storage.loadJobPlayer(jobPlayer.playerUuid());
         assertNotNull(loaded);
         assertEquals(jobPlayer, loaded);
         loaded.setCurrentJobName("job2");
         storage.saveJobPlayer(loaded);
-        var reloaded = storage.loadJobPlayer(loaded.playerUUID());
+        var reloaded = storage.loadJobPlayer(loaded.playerUuid());
         assertNotNull(reloaded);
         assertEquals(loaded, reloaded);
     }
 
     @Test
     void writeReadJobProgression() {
-        var progression = new PlayerJobProgression(UUID.randomUUID(), "job1", 0, 0);
+        var progression = new PlayerJobProgression(UUID.randomUUID(), Job.MINER, 0, 0);
         storage.saveJobProgression(progression);
-        var loaded = storage.loadJobProgression(progression.player(), progression.jobName());
+        var loaded = storage.loadJobProgression(progression.playerUuid(), progression.job());
         assertNotNull(loaded);
         assertEquals(progression, loaded);
         progression.setLevel(1);
         progression.setXp(100);
         storage.saveJobProgression(progression);
-        var reloaded = storage.loadJobProgression(progression.player(), progression.jobName());
+        var reloaded = storage.loadJobProgression(progression.playerUuid(), progression.job());
         assertNotNull(reloaded);
         assertEquals(progression, reloaded);
 
