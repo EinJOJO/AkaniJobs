@@ -15,14 +15,9 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.UUID;
 
-public class SQLJobStorage implements JobStorage {
+public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
     private static final Logger logger = LoggerFactory.getLogger(SQLJobStorage.class);
-    private final HikariDataSource dataSource;
 
-
-    public SQLJobStorage(HikariDataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
     @Override
     public boolean init() {

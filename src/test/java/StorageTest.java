@@ -1,5 +1,5 @@
 import it.einjojo.jobs.Job;
-import it.einjojo.jobs.db.HikariCP;
+import it.einjojo.jobs.db.MariaHikariCP;
 import it.einjojo.jobs.db.SQLJobStorage;
 import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.JobProgression;
@@ -14,12 +14,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class StorageTest {
-    private HikariCP hikariCP;
+    private MariaHikariCP hikariCP;
     private SQLJobStorage storage;
 
     @BeforeAll
     void setUp() {
-        hikariCP = new HikariCP();
+        hikariCP = new MariaHikariCP();
         storage = new SQLJobStorage(hikariCP.dataSource());
         storage.init();
     }

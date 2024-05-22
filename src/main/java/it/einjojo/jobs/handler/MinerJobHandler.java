@@ -7,11 +7,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class MinerJobHandler extends AbstractJobHandler implements Listener {
-    private Map<Material, ORE_QUALITY> oreQualityMap;
+    private static final Map<Material, ORE_QUALITY> ORE_QUALITY_MAP = new HashMap<>();
 
     public MinerJobHandler(JavaPlugin plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -26,8 +27,8 @@ public class MinerJobHandler extends AbstractJobHandler implements Listener {
         });
     }
 
-    ORE_QUALITY oreQuality(Material material) {
-        return oreQualityMap.getOrDefault(material, ORE_QUALITY.NOT_A_ORE);
+    private ORE_QUALITY oreQuality(Material material) {
+        return ORE_QUALITY_MAP.getOrDefault(material, ORE_QUALITY.NOT_A_ORE);
     }
 
     @Override

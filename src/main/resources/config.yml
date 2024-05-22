@@ -1,0 +1,8 @@
+# Optional only. On Akani it uses the central connection.
+mariadb:
+    host: localhost
+    port: 3306
+    database: jobs
+    username: root
+    password: password
+
