@@ -2,6 +2,7 @@ package it.einjojo.jobs.player.progression;
 
 import it.einjojo.jobs.DataSaveTask;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 public class JobProgressionObserverImpl implements JobProgressionObserver {
@@ -21,7 +22,8 @@ public class JobProgressionObserverImpl implements JobProgressionObserver {
     }
 
     private Component createActionBarMessage(int deltaXp) {
-        return Component.text("§a+" + deltaXp + "§7 XP");
+        return Component.text("+" + deltaXp).color(NamedTextColor.GREEN)
+                .append(Component.text(" XP").color(NamedTextColor.GRAY));
     }
 
     @Override

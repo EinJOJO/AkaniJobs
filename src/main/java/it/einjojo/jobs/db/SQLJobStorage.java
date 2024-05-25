@@ -91,7 +91,9 @@ public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
             ps.setString(1, player.toString());
             try (var rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new JobPlayerImpl(player, Job.valueOf(rs.getString("job_name")));
+                    String jobName = rs.getString("job_name");
+                    Job optionalJob = jobName != null ? Job.valueOf(jobName) : null;
+                    return new JobPlayerImpl(player, optionalJob);
                 }
             }
         } catch (Exception e) {

@@ -11,6 +11,7 @@ import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.JobProgression;
 import it.einjojo.jobs.player.progression.JobProgressionObserver;
 import it.einjojo.jobs.player.progression.JobProgressionObserverImpl;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class Jobs {
+
     private final JobStorage storage;
     private final JobProgressionObserver progressionObserver;
     private final JobChangeObserver currentJobObserver;

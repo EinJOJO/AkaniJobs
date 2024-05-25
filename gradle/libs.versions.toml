@@ -12,6 +12,8 @@ jedis = "5.1.0"
 hikaricp = "5.1.0"
 invui = "1.30"
 guava = "33.1.0-jre"
+obliviateinvs = "4.3.0"
+mariadb = "2.7.3"
 
 
 [libraries]
@@ -24,11 +26,16 @@ jedis = { group = "redis.clients", name = "jedis", version.ref = "jedis" }
 luckperms = { group = "net.luckperms", name = "api", version.ref = "luckperms" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
-
 akanicore = { group = "it.einjojo.akani.core", name = "paper", version.ref = "akanicore" }
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 invui = { group = "xyz.xenondevs.invui", name = "invui", version.ref = "invui" }
-mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version = "2.7.3" }
+mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb"}
+obliviateinvs-core = { group = "com.github.hamza-cskn.obliviate-invs", name = "core", version.ref = "obliviateinvs" }
+obliviateinvs-advancedslot = { group = "com.github.hamza-cskn.obliviate-invs", name = "pagination", version.ref = "obliviateinvs" }
+obliviateinvs-pagination = { group = "com.github.hamza-cskn.obliviate-invs", name = "advancedslot", version.ref = "obliviateinvs" }
+
+[bundles]
+obliviateinvs = ["obliviateinvs-core", "obliviateinvs-pagination", "obliviateinvs-advancedslot"]
 
 [plugins]
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }

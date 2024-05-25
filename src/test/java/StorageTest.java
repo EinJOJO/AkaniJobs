@@ -19,7 +19,7 @@ public class StorageTest {
 
     @BeforeAll
     void setUp() {
-        hikariCP = new MariaHikariCP();
+        hikariCP = new MariaHikariCP("localhost", 3306, "test", "root", "0");
         storage = new SQLJobStorage(hikariCP.dataSource());
         storage.init();
     }

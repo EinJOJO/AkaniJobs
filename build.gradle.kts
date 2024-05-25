@@ -1,6 +1,7 @@
 plugins {
     id("java")
     alias(libs.plugins.runpaper)
+    alias(libs.plugins.shadow)
 
 }
 
@@ -9,6 +10,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.aikar.co/content/groups/aikar/")
     maven("https://repo.akani.dev/releases")
@@ -25,7 +27,7 @@ dependencies {
     compileOnly(libs.caffeine)
     compileOnly(libs.mariadb)
     implementation(libs.acf)
-    implementation(libs.invui)
+    implementation(libs.bundles.obliviateinvs)
 
     testImplementation(libs.guava)
     testImplementation(libs.hikaricp)
@@ -41,7 +43,7 @@ java {
 
 tasks {
     withType<JavaCompile> {
-        options.encoding = "UTF-8"
+        options.encoding = "UTF-8";
     }
 
     withType<Test> {
@@ -51,6 +53,14 @@ tasks {
     runServer {
         minecraftVersion("1.20.4")
 
+    }
+
+    assemble {
+        dependsOn("shadowJar")
+    }
+
+    shadowJar {
+        relocate("co.aikar.commands", "it.einjojo.akani.core.commands")
     }
 
     processResources {
