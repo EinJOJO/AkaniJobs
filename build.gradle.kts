@@ -47,7 +47,7 @@ tasks {
     }
 
     withType<Test> {
-        useJUnitPlatform()
+        //useJUnitPlatform()
     }
 
     runServer {
@@ -61,6 +61,10 @@ tasks {
 
     shadowJar {
         relocate("co.aikar.commands", "it.einjojo.akani.core.commands")
+        archiveBaseName.set("AkaniJobs")
+        archiveClassifier.set("")
+        archiveVersion.set("")
+
     }
 
     processResources {

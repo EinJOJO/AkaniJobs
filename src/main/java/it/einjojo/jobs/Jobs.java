@@ -11,7 +11,8 @@ import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.JobProgression;
 import it.einjojo.jobs.player.progression.JobProgressionObserver;
 import it.einjojo.jobs.player.progression.JobProgressionObserverImpl;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import it.einjojo.jobs.reward.JobRewardRegistry;
+import it.einjojo.jobs.reward.RewardManager;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -24,7 +25,9 @@ public class Jobs {
     private final JobStorage storage;
     private final JobProgressionObserver progressionObserver;
     private final JobChangeObserver currentJobObserver;
+    private final RewardManager rewardManager;
     private final JobHandlerRegistry handlerRegistry = new JobHandlerRegistry(this);
+    private final JobRewardRegistry rewardRegistry = new JobRewardRegistry();
     private final AsyncLoadingCache<UUID, JobPlayer> jobPlayers = Caffeine.newBuilder()
             .expireAfterAccess(Duration.ofMinutes(3))
             .buildAsync(this::loadPlayer);
@@ -36,6 +39,7 @@ public class Jobs {
         this.storage = storage;
         this.progressionObserver = new JobProgressionObserverImpl(saveTask);
         this.currentJobObserver = new JobChangeObserverImpl(this, saveTask);
+        this.rewardManager = new RewardManager(storage, this);
     }
 
     public CompletableFuture<JobPlayerImpl> loadPlayer(UUID uuid, Executor executor) {
@@ -60,6 +64,13 @@ public class Jobs {
         }, executor);
     }
 
+    public RewardManager rewardManager() {
+        return rewardManager;
+    }
+
+    public JobRewardRegistry rewardRegistry() {
+        return rewardRegistry;
+    }
 
     public JobStorage storage() {
         return storage;

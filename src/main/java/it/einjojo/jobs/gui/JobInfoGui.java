@@ -1,19 +1,21 @@
 package it.einjojo.jobs.gui;
 
 import it.einjojo.jobs.Job;
-import it.einjojo.jobs.Jobs;
 import it.einjojo.jobs.player.JobPlayer;
 import mc.obliviate.inventory.Icon;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 
 public class JobInfoGui extends ExtendedGui {
     private final JobPlayer jobPlayer;
+    private final GuiFactory guiFactory;
 
-    public JobInfoGui(Player player, JobPlayer jobPlayer) {
+    public JobInfoGui(Player player, JobPlayer jobPlayer, GuiFactory guiFactory) {
         super(player, "job_info", "§cJob Info");
         this.jobPlayer = jobPlayer;
+        this.guiFactory = guiFactory;
     }
 
     @Override
@@ -23,7 +25,22 @@ public class JobInfoGui extends ExtendedGui {
         playOpenSound();
         backToOverviewIcon();
         helpIcon();
+        levelIcon(jobPlayer);
 
+    }
+
+    private void levelIcon(JobPlayer jobPlayer) {
+        addItem(new Icon(Material.CHEST_MINECART).setName("§6Belohnungen").onClick((click) -> {
+            jobPlayer.progressionAsync().thenAccept((progression) -> {
+                if (progression.isEmpty()) {
+                    player.sendMessage("§cFehler beim Laden deiner Job-Informationen.");
+                    return;
+                }
+                Bukkit.getScheduler().runTask(getPlugin(), () -> {
+                    guiFactory.createLevelRewardsGui(player, progression.get()).open();
+                });
+            });
+        }));
     }
 
     private void jobIcon(JobPlayer jobPlayer) {
@@ -58,7 +75,7 @@ public class JobInfoGui extends ExtendedGui {
     }
 
     private void backToOverview() {
-        new JobOverviewGui(player, jobPlayer).open();
+        guiFactory.createJobOverviewGui(player, jobPlayer).open();
     }
 
 

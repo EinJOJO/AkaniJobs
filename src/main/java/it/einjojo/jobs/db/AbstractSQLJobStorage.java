@@ -1,7 +1,6 @@
 package it.einjojo.jobs.db;
 
 import com.google.common.base.Preconditions;
-import com.zaxxer.hikari.HikariDataSource;
 import it.einjojo.jobs.Job;
 import it.einjojo.jobs.player.JobPlayer;
 import it.einjojo.jobs.player.JobPlayerImpl;
@@ -12,19 +11,24 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
-public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
-    private static final Logger logger = LoggerFactory.getLogger(SQLJobStorage.class);
+public abstract class AbstractSQLJobStorage implements JobStorage {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractSQLJobStorage.class);
 
+    protected abstract Connection getConnection() throws SQLException;
 
     @Override
     public boolean init() {
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS jobs_progressions " + "(player_uuid VARCHAR(36) NOT NULL, " + "job_name VARCHAR(16) NOT NULL, " + "level INT NOT NULL, " + "experience INT NOT NULL, " + "PRIMARY KEY (player_uuid, job_name));");
             statement.execute("CREATE TABLE IF NOT EXISTS jobs_players " + "(player_uuid VARCHAR(36) NOT NULL, " + "job_name VARCHAR(16) NULL, " + "PRIMARY KEY (player_uuid));");
             statement.execute("CREATE TABLE IF NOT EXISTS jobs_locks " + "(player_uuid VARCHAR(36) NOT NULL, " + "PRIMARY KEY (player_uuid));");
+            statement.execute("CREATE TABLE IF NOT EXISTS jobs_rewards " + "(player_uuid VARCHAR(36) NOT NULL, " + "reward_id VARCHAR(36) NOT NULL, " + "PRIMARY KEY (player_uuid, reward_id));");
             logger.info("SQLJobStorage initialized");
             return true;
         } catch (Exception e) {
@@ -37,7 +41,7 @@ public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
         Preconditions.checkNotNull(jobPlayer, "playerJob cannot be null");
         String sql = "INSERT INTO jobs_players (player_uuid, job_name) " + "VALUES (?, ?) " + "ON DUPLICATE KEY UPDATE job_name = ?;";
 
-        try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, jobPlayer.playerUuid().toString());
             ps.setString(2, jobPlayer.currentJobName());
             ps.setString(3, jobPlayer.currentJobName());
@@ -52,7 +56,7 @@ public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
         Preconditions.checkNotNull(progression, "progression cannot be null");
         String sql = "INSERT INTO jobs_progressions (player_uuid, job_name, level, experience) " + "VALUES (?, ?, ?, ?) " + "ON DUPLICATE KEY UPDATE level = ?, experience = ?;";
 
-        try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, progression.playerUuid().toString());
             ps.setString(2, progression.jobName());
             ps.setInt(3, progression.level());
@@ -70,7 +74,7 @@ public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
     public @NotNull JobProgression loadJobProgression(@NotNull UUID player, @NotNull Job job) {
         String sql = "SELECT level, experience FROM jobs_progressions WHERE player_uuid = ? AND job_name = ?;";
 
-        try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, player.toString());
             ps.setString(2, job.name());
 
@@ -87,7 +91,7 @@ public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
     @Override
     public @NotNull JobPlayerImpl loadJobPlayer(@NotNull UUID player) {
         String sql = "SELECT job_name FROM jobs_players WHERE player_uuid = ?;";
-        try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, player.toString());
             try (var rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -105,7 +109,7 @@ public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
     @Override
     public void lockPlayer(@NotNull UUID player) {
         String sql = "INSERT INTO jobs_locks (player_uuid) VALUES (?) ON DUPLICATE KEY UPDATE player_uuid = player_uuid;";
-        try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, player.toString());
             ps.executeUpdate();
         } catch (Exception e) {
@@ -116,7 +120,7 @@ public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
     @Override
     public void unlockPlayer(@NotNull UUID player) {
         String sql = "DELETE FROM jobs_locks WHERE player_uuid = ?";
-        try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, player.toString());
             ps.executeUpdate();
         } catch (Exception e) {
@@ -127,13 +131,54 @@ public record SQLJobStorage(HikariDataSource dataSource) implements JobStorage {
     @Override
     public boolean isPlayerLocked(@NotNull UUID player) {
         String sql = "SELECT player_uuid FROM jobs_locks WHERE player_uuid = ?";
-        try (Connection connection = dataSource.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, player.toString());
             try (var rs = ps.executeQuery()) {
                 return rs.next();
             }
         } catch (Exception e) {
             throw new StorageException("is player locked %s".formatted(player), e);
+        }
+    }
+
+    @Override
+    public Set<String> loadClaimedRewards(@NotNull UUID player) {
+        String sql = "SELECT reward_id FROM jobs_rewards WHERE player_uuid = ?";
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, player.toString());
+            Set<String> rewards = new HashSet<>();
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    rewards.add(rs.getString("reward_id"));
+                }
+                return rewards;
+            }
+        } catch (Exception e) {
+            throw new StorageException("load claimed rewards %s".formatted(player), e);
+        }
+    }
+
+    @Override
+    public void saveClaimedReward(@NotNull UUID player, @NotNull String rewardId) {
+        String sql = "INSERT INTO jobs_rewards (player_uuid, reward_id) VALUES (?, ?)";
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, player.toString());
+            ps.setString(2, rewardId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            throw new StorageException("save claimed reward %s %s".formatted(player, rewardId), e);
+        }
+    }
+
+    @Override
+    public void deleteClaimedReward(@NotNull UUID player, @NotNull String rewardId) {
+        String sql = "DELETE FROM jobs_rewards WHERE player_uuid = ? AND reward_id = ?";
+        try (Connection connection = getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, player.toString());
+            ps.setString(2, rewardId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            throw new StorageException("delete claimed reward %s %s".formatted(player, rewardId), e);
         }
     }
 }

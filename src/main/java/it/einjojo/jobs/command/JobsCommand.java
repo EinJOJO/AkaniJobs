@@ -8,8 +8,7 @@ import com.google.common.base.Preconditions;
 import it.einjojo.jobs.Job;
 import it.einjojo.jobs.Jobs;
 import it.einjojo.jobs.JobsPlugin;
-import it.einjojo.jobs.gui.JobInfoGui;
-import it.einjojo.jobs.gui.JobOverviewGui;
+import it.einjojo.jobs.gui.GuiFactory;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -43,12 +42,13 @@ public class JobsCommand extends BaseCommand {
     @Default
     @Description("open job gui")
     public void openJobGui(Player player) {
+
         jobs.jobPlayers().get(player.getUniqueId()).thenAccept(jobPlayer -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (jobPlayer.currentJob() != null) {
-                    new JobInfoGui(player, jobPlayer).open();
+                    new GuiFactory(jobs).createJobInfoGui(player, jobPlayer).open();
                 } else {
-                    new JobOverviewGui(player, jobPlayer).open();
+                    new GuiFactory(jobs).createJobOverviewGui(player, jobPlayer).open();
                 }
             });
         }).exceptionally((ex) -> {

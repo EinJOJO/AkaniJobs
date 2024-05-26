@@ -6,6 +6,7 @@ import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.JobProgression;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface JobStorage {
@@ -28,5 +29,13 @@ public interface JobStorage {
     void unlockPlayer(@NotNull UUID player);
 
     boolean isPlayerLocked(@NotNull UUID player);
+
+    Set<String> loadClaimedRewards(@NotNull UUID player);
+
+    void saveClaimedReward(@NotNull UUID player, @NotNull String rewardId);
+
+    void deleteClaimedReward(@NotNull UUID player, @NotNull String rewardId);
+
+
 
 }

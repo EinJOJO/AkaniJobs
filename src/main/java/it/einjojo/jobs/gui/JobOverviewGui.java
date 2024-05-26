@@ -12,9 +12,12 @@ import org.bukkit.inventory.ItemFlag;
 public class JobOverviewGui extends ExtendedGui {
     private final JobPlayer jobPlayer;
 
-    public JobOverviewGui(Player player, JobPlayer jobPlayer) {
+    private final GuiFactory guiFactory;
+
+    public JobOverviewGui(Player player, JobPlayer jobPlayer, GuiFactory guiFactory) {
         super(player, "jobs_overview", "§cJobs Übersicht");
         this.jobPlayer = jobPlayer;
+        this.guiFactory = guiFactory;
 
     }
 
@@ -86,15 +89,14 @@ public class JobOverviewGui extends ExtendedGui {
                 playClickSound();
                 if (confirm) {
                     jobPlayer.setCurrentJob(job);
-                    new JobInfoGui(player, jobPlayer).open();
+                    guiFactory.createJobInfoGui(player, jobPlayer).open();
                 } else {
-                    new JobOverviewGui(player, jobPlayer).open();
+                    guiFactory.createJobOverviewGui(player, jobPlayer).open();
                 }
             }).open();
         } else {
             jobPlayer.setCurrentJob(job);
-            new JobInfoGui(player, jobPlayer).open();
-
+            guiFactory.createJobInfoGui(player, jobPlayer).open();
         }
 
     }

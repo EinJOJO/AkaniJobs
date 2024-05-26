@@ -1,6 +1,7 @@
 import it.einjojo.jobs.Job;
+import it.einjojo.jobs.db.AbstractSQLJobStorage;
+import it.einjojo.jobs.db.HikariSQLJobStorage;
 import it.einjojo.jobs.db.MariaHikariCP;
-import it.einjojo.jobs.db.SQLJobStorage;
 import it.einjojo.jobs.player.JobPlayerImpl;
 import it.einjojo.jobs.player.progression.JobProgression;
 import org.junit.jupiter.api.AfterAll;
@@ -15,12 +16,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class StorageTest {
     private MariaHikariCP hikariCP;
-    private SQLJobStorage storage;
+    private AbstractSQLJobStorage storage;
 
     @BeforeAll
     void setUp() {
         hikariCP = new MariaHikariCP("localhost", 3306, "test", "root", "0");
-        storage = new SQLJobStorage(hikariCP.dataSource());
+        storage = new HikariSQLJobStorage(hikariCP.dataSource());
         storage.init();
     }
 
