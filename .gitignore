@@ -115,3 +115,5 @@ $RECYCLE.BIN/
 /.idea/material_theme_project_new.xml
 /.idea/misc.xml
 run/
+/.idea/deployment.xml
+/.idea/webServers.xml
